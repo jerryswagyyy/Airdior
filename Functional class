@@ -1,0 +1,209 @@
+class Datapdct3{
+    String val;
+    String []operator ={"+","-","x","÷"};
+    StringBuilder sb = new StringBuilder();
+    int n = 3;
+    int num1 = (int)(Math.random()*100)+1;
+    public void quest(){
+        sb.append(num1);
+        for(int i=0;i<n-1;i++){
+            int op = (int)(Math.random()*4);
+            int num2 = (int)(Math.random()*100)+1;
+            sb.append(operator[op]).append(num2);
+        }
+        val = sb.toString();
+    }
+}
+
+class TrueFraction{
+    StringBuilder sb = new StringBuilder();
+    int num1 = (int)(Math.random()*100)+1;
+    int num2 = (int)(Math.random()*100)+1;
+    public String creFrac(){
+        sb.append(num1);
+        while (num1>num2){
+            num2 = (int)(Math.random()*100)+1;
+        }
+        sb.append("/").append(num2);
+        return sb.toString();
+    }
+}                                      //生成真分数
+
+
+class  Datapdct6{                                            //生成单行算式, 小学六年级难度
+    TrueFraction trueFraction;
+    String val;
+    StringBuilder sb = new StringBuilder();                  //可变字符串
+    String []operator ={"+","-","x","÷"};
+    int n = 3;                                               //操作数数量
+    int num1 = (int)(Math.random()*100)+1;                   //确定第一位操作数
+    public  void  quest(){
+        Random r = new Random();
+        sb.append(num1);
+        for(int i=1;i<=(n-1);i++){
+            trueFraction = new TrueFraction();
+            int a = (int)(r.nextInt(2));             //0,1之间的数
+            int op = (int)(Math.random()*4);               //生成操作符
+            if(a==1){
+                sb.append(operator[op]).append(trueFraction.creFrac());   //为1时，否则添加整数，添加真分数
+            }else {
+                int num2 = (int)(Math.random()*100)+1;
+                sb.append(operator[op]).append(num2);
+            }
+        }
+        val = sb.toString();                                 //算式表达输出
+    }                               //生成
+}                                        //算式生成
+
+
+
+
+
+
+class  Formular{
+    Datapdct6 d2;                                            //组合Datapdct6类
+    int input;                                               //生成算式的数量
+    String result = "";
+    /**
+     * 算式结果
+     * @param expression
+     * @return
+     */
+    public  List<String> BrackeForm(List<String> expression){
+        int brackeNumber = 0;
+        //List<String> brackexp= new ArrayList<>();
+        if(expression.size()>=7){
+            brackeNumber = (int)((Math.random()*2)+1);
+        }else if(expression.size()>=4){
+            brackeNumber = 1;
+        }else {
+            brackeNumber = 0;
+        }
+        int lens = expression.size();
+
+        for(int i=0;i<lens;i++){
+            int a= expression.indexOf("(");
+            if(a!=-1){
+                continue;
+            }
+            if(expression.get(1).equals("+")||expression.get(1).equals("-")){
+                expression.add(0,"(");
+                expression.add(4,")");
+            }else if(expression.get(i).equals("+")||expression.get(i).equals("-")){
+                expression.add(i-1,"(");
+                if(i==expression.size()-2){
+                    expression.add(")");
+                }else {
+                    expression.add(i+3,")");
+                }
+            }
+        }
+        return expression;
+    } //插入括号
+
+    public  List<String> toList(String expression){
+        int index = 0;                                       //光标
+        List<String> list = new ArrayList<>();               //创建列表保存中缀表达式
+        do{
+            char c = expression.charAt(index);
+            if(c<47||c>=58){                                 //如果为操作符直接存入
+                index++;
+                list.add(c+"");
+            }else if(c >=47 && c < 58){                     //如果为数字和分数符号，还有连续数字的情况
+                String str = "";
+                while (index<expression.length()&& expression.charAt(index) >=47 && expression.charAt(index) <58){
+                    str += expression.charAt(index);
+                    index++;
+                }
+                list.add(str);                              //将数字和分数添加进列表
+            }
+        }while (index<expression.length());
+        return list;
+    }      //将中缀表达式转化为列表储存
+
+    public List<String> solve(List<String> list) {
+        Stack<String> operatorStack = new Stack<>();          //运算符储存栈
+        ArrayList<String> postexp = new ArrayList<>();        //储存后缀表达式
+        for(int i=0;i<list.size();i++){
+            String id = list.get(i);                          //光标变量
+            if(id.equals("(")){
+                operatorStack.push(id);                        //遇到左括号直接进栈
+            }else if(id.equals(")")){
+                while (!operatorStack.peek().equals("(")){     //遇到右括号，将前面左括号前的操作符全部弹出加到postexp，左括号出栈
+                    postexp.add(operatorStack.pop());
+                }
+                operatorStack.pop();
+            }
+            if(id.equals("+")||id.equals("-")||id.equals("x")||id.equals("÷")){   //遇到其他操作符
+                if(id.equals("+")||id.equals("-")){                              //操作符为加号或者减号先把括号前的符号和栈内符号全部弹出
+                    while (!operatorStack.empty()){
+                        if(!operatorStack.peek().equals("(")){
+                            postexp.add(operatorStack.pop());
+                        }else {
+                            break;
+                        }
+                    }
+                    operatorStack.push(id);                                     //加减号进栈
+                }else if(id.equals("x")||id.equals("÷")) {                      //如果栈顶为同级运算符则弹出加入postexp否则进栈
+                   while (!operatorStack.empty()) {
+                       if (operatorStack.peek().equals("x") || operatorStack.peek().equals("÷") || operatorStack.peek().equals("(")) {
+                           postexp.add(operatorStack.pop());
+                       } else {
+                           break;
+                       }
+                   }
+                   operatorStack.push(id);
+               }
+            }
+            if(!id.equals("+") && !id.equals("-") && !id.equals("x") && !id.equals("÷") && !id.equals("(") && !id.equals(")")){
+                postexp.add(id);                          //是操作数则会直接加入postexp
+            }
+        }
+        while (!operatorStack.empty()){                    //检索完算式后则操作符栈依次出栈
+            postexp.add(operatorStack.pop());
+        }
+        return postexp;
+    }       //中缀表达式转为后缀表达式以列表储存
+
+    public String calculateValue(List<String> list) {
+        String finalresult = "";
+        Stack<String> result = new Stack<>();             //计算操作栈
+        for(int i=0;i<list.size();i++){
+            String  cursor = list.get(i);                //光标变量
+            if(!cursor.equals("+") && !cursor.equals("-") && !cursor.equals("x") && !cursor.equals("÷") ){
+                result.push(cursor);
+            }else {
+                String num2 = result.pop();
+                String num1 = result.pop();
+                BigFraction ans = BigFraction.valueOf(0);
+                if(cursor.equals("+")){
+                    ans = BigFraction.valueOf(num1).add(BigFraction.valueOf(num2));
+                }else if(cursor.equals("-")){
+                    ans = BigFraction.valueOf(num1).subtract(BigFraction.valueOf(num2));
+                }else if(cursor.equals("x")){
+                    ans = BigFraction.valueOf(num1).multiply(BigFraction.valueOf(num2));
+                }else if(cursor.equals("÷")){
+                    ans = BigFraction.valueOf(num1).divide(BigFraction.valueOf(num2));
+                }
+                result.push(ans.toString());
+            }
+        }
+        finalresult = result.pop();                 //取出算式结果
+        if(finalresult.matches("\\d+/1")){    //如果是“数字/1”形式则去掉“/1”
+            int index  = finalresult.indexOf("/1");
+            finalresult = finalresult.substring(0,index);
+        }
+        return finalresult;
+    }    //计算后缀表达式
+
+    public void  showFormular(){
+        int input = 10;
+        //Scanner sc = new Scanner(System.in);                 //输入生成算式的个数
+        //input = sc.nextInt();
+        for(int i=0;i<input;i++){
+            d2 = new Datapdct6();
+            d2.quest();
+            System.out.println(d2.val);
+        }
+    }                  //生成算式册
+}                                         //处理算式
